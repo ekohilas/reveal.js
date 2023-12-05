@@ -114,10 +114,25 @@ const Plugin = () => {
 
 		options = getSlidifyOptions( options );
 
-		var notesMatch = content.split( new RegExp( options.notesSeparator, 'mgi' ) );
+		var notesMatch = content.split( new RegExp( options.notesSeparator, 'mgi' ));
 
-		if( notesMatch.length === 2 ) {
-			content = notesMatch[0] + '<aside class="notes">' + marked(notesMatch[1].trim()) + '</aside>';
+		console.log("content: %o", content);
+		console.log("notesMatch: %o", notesMatch);
+
+		if( notesMatch.length >= 2 ) {
+			const fence = "```";
+			const endCodeIndex = notesMatch.indexOf(fence, 1);
+			var notes = notesMatch.slice(1).join("\n").trim(); 
+			var contentMatch = notesMatch[0];
+			var isCodeBlock = notesMatch[0].startsWith(fence);
+			console.log("block %o, end %o", isCodeBlock, endCodeIndex);
+			if (isCodeBlock && endCodeIndex !== -1) {
+				// First element is code block
+				contentMatch = notesMatch.slice(0, endCodeIndex + 1).join("\n");
+				notes = notesMatch.slice(endCodeIndex + 1).join("\n").trim();
+			}
+			console.log("content %o, notes: %o", contentMatch, notes);
+			content = marked(contentMatch) + '<aside class="notes">' + marked(notes) + '</aside>';
 		}
 
 		// prevent script end tags in the content from interfering
